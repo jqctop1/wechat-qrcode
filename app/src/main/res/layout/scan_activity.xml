@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.ocean.star.wechatscan.ScanDetectQRCodeView
+        android:id="@+id/scan_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"/>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/camera_operation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/switch_camera_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="Switch Camera"/>
+
+        <Button
+            android:id="@+id/switch_flash_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/switch_camera_btn"
+            android:text="Switch Flash"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

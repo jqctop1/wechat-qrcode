@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.MyApplication" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_500</item>
+    </style>
+
+    <style name="Theme.AppCompat.FullScreen" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>

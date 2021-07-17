@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ocean.star.wechatqrcode">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application
+        android:name=".WeChatQRCodeApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="WeChatQRCode"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyApplication">
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|layoutDirection|screenSize|fontScale|navigation"
+            android:screenOrientation="portrait">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <activity android:name=".ScanActivity"
+            android:theme="@style/Theme.AppCompat.FullScreen"
+            android:launchMode="singleTop"/>
+
+    </application>
+
+</manifest>

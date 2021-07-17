@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        externalNativeBuild {
+            cmake {
+                abiFilters  "armeabi-v7a","arm64-v8a"
+                arguments   "-DANDROID_CPP_FEATURES=rtti exceptions",
+                            "-DANDROID_STL=c++_shared"
+                            "-DANDROID_TOOLCHAIN=clang"
+                            "-DANDROID_TOOLCHAIN_FILE=~/Library/Android/sdk/ndk/19.2.5345600/build/cmake/android.toolchain.cmake"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+
+}
