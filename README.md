@@ -2,9 +2,9 @@
 An android library which use OpenCV Wechat-QRCode to decode qrcode
 
 ### NOTICE!!! Before Your Compile
-you must use **7z** to unzip wechat-scan\libs\wechat-scan-libs.zip to wechat-scan\libs.  
+you must use **7z** to unzip wechat-scan\libs\wechat-scan-libs.7z to wechat-scan\libs.  
 
-wechat-scan-libs.zip contains static libraries which are compiled from [opecv](https://github.com/opencv/opencv) and [opecv_contrib](https://github.com/opencv/opencv_contrib)
+wechat-scan-libs.7z contains static libraries which are compiled from [opecv](https://github.com/opencv/opencv) and [opecv_contrib](https://github.com/opencv/opencv_contrib)
 
 ### How to Use
 We support decode qrcode from the camera preview and image files.   
