@@ -49,7 +49,7 @@ class WeChatQRCodeDetector {
         }
     }
 
-    class DecodeResult(val text: String, val rect: Rect) {
+    class Result(text: String, rect: Rect) : DecodeResult(text, rect) {
 
         override fun toString(): String {
             return "(text:$text, rect:$rect)"
@@ -58,9 +58,9 @@ class WeChatQRCodeDetector {
 
     private external fun init(detectProto: String, detectModel: String, srProto: String, srModel: String) : Int
 
-    private external fun detectRGB(id: Int, rgb: IntArray, width: Int, height: Int) : Array<DecodeResult>
+    private external fun detectRGB(id: Int, rgb: IntArray, width: Int, height: Int) : Array<Result>
 
-    private external fun detectNV21(id: Int, yuv: ByteArray, width: Int, height: Int) : Array<DecodeResult>
+    private external fun detectNV21(id: Int, yuv: ByteArray, width: Int, height: Int) : Array<Result>
 
     private external fun release(id: Int)
 

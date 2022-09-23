@@ -17,7 +17,7 @@ class FileDecodeQueue private constructor() {
     private val TAG = "FileDecodeQueue"
 
     interface DecodeCallback {
-        fun onResult(resultList: List<WeChatQRCodeDetector.DecodeResult>)
+        fun onResult(resultList: List<DecodeResult>)
     }
 
     private var decodeExecutor = Executors.newSingleThreadExecutor()
@@ -128,7 +128,7 @@ class FileDecodeQueue private constructor() {
             }
         }
 
-        private fun doCallback(resultList: List<WeChatQRCodeDetector.DecodeResult>) {
+        private fun doCallback(resultList: List<DecodeResult>) {
             callbacks.forEach {
                 it.onResult(resultList)
             }
@@ -162,7 +162,7 @@ class FileDecodeQueue private constructor() {
             }
         }
 
-        private fun doCallback(resultList: List<WeChatQRCodeDetector.DecodeResult>) {
+        private fun doCallback(resultList: List<DecodeResult>) {
             callback.onResult(resultList)
             mainHandler.post(decodeNextRunnable)
         }
