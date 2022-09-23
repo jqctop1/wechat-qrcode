@@ -11,21 +11,27 @@ class ScanDetectQRCodeView @JvmOverloads constructor(context: Context, attrs: At
 
     private val TAG = "ScanDetectQRCodeView"
 
-    private lateinit var qrCodeRectView: QRCodeRectView
+    private val qrCodeRectView: QRCodeRectView
 
     init {
         qrCodeRectView = QRCodeRectView(context)
         addView(qrCodeRectView, 1, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 
-    override fun onResult(resultList: List<WeChatQRCodeDetector.DecodeResult>) {
+    override fun onResult(resultList: List<DecodeResult>) {
         val matrix = getPreviewMatrix()
         qrCodeRectView.drawQRCode(resultList.map {
             val viewRect = RectF()
-            matrix.mapRect(viewRect, RectF(it.rect))
-            Log.d(TAG, "${it.rect} -> $viewRect")
+            if (it.rect.width() > 0 && it.rect.height() > 0) {
+                matrix.mapRect(viewRect, RectF(it.rect))
+                Log.d(TAG, "${it.rect} -> $viewRect")
+            }
             viewRect
         })
         super.onResult(resultList)
+    }
+
+    fun clearQRCode() {
+        qrCodeRectView.drawQRCode(emptyList())
     }
 }

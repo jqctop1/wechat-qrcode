@@ -10,23 +10,21 @@ import com.ocean.star.wechatscan.camera.CameraController
 import com.ocean.star.wechatscan.camera.CameraPreviewView
 
 open class ScanQRCodeView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
-    : CameraPreviewView(context, attrs, defStyleAttr), ImageReader.OnImageAvailableListener, ScanDecodeQueue.DecodeCallback {
+    : CameraPreviewView(context, attrs, defStyleAttr), ImageReader.OnImageAvailableListener, DecodeCallback {
 
     private val TAG = "ScanQRCodeView"
 
     var scanCallback: ScanCallback? = null
     private var nextImage: Image? = null
-    private var scanDecodeQueue = ScanDecodeQueue(context, this).apply {
+    private var scanDecodeQueue = WeChatScanDecodeQueue(context, this).apply {
         decodeCallback = this@ScanQRCodeView
     }
-
-    init {
-        cameraController?.pictureFormat = ImageFormat.YUV_420_888
-        cameraController?.pictureMaxCount = 1
-    }
+    /*private var scanDecodeQueue = ZxingScanDecodeQueue(this).apply {
+        decodeCallback = this@ScanQRCodeView
+    }*/
 
     interface ScanCallback {
-        fun onScanResult(resultList: List<WeChatQRCodeDetector.DecodeResult>)
+        fun onScanResult(resultList: List<DecodeResult>)
     }
 
     private val cameraCallback = object : CameraController.CameraCallback() {
@@ -37,20 +35,21 @@ open class ScanQRCodeView @JvmOverloads constructor(context: Context, attrs: Att
 
         override fun onPreviewStarted() {
             Log.i(TAG, "onPreviewStarted, preview size: ${cameraController?.previewSize}, ${cameraController?.pictureFormat}")
-            cameraController?.takePicture()
-            cameraController?.imageReader?.setOnImageAvailableListener(this@ScanQRCodeView, null)
+            cameraController?.previewImageReader?.setOnImageAvailableListener(this@ScanQRCodeView, null)
         }
     }
 
     override fun onImageAvailable(imageReader: ImageReader?) {
-        imageReader?.let {
-            Log.i(TAG, "onImageAvailable, ${it.maxImages}")
-            nextImage?.close()
-            nextImage = it.acquireNextImage()
-            nextImage?.apply {
-                Log.i(TAG, "image format: ${format}")
-                if (format == ImageFormat.YUV_420_888) {
-                    scanDecodeQueue.decode(this)
+        if (imageReader == cameraController?.previewImageReader) {
+            imageReader?.let { reader ->
+                Log.i(TAG, "onImageAvailable, ${reader.maxImages}")
+                nextImage?.close()
+                nextImage = reader.acquireNextImage()
+                nextImage?.let {
+                    Log.i(TAG, "image format: $it.format")
+                    if (it.format == ImageFormat.YUV_420_888) {
+                        scanDecodeQueue.decode(it)
+                    }
                 }
             }
         }
@@ -66,7 +65,7 @@ open class ScanQRCodeView @JvmOverloads constructor(context: Context, attrs: Att
         cameraController?.pausePreview()
     }
 
-    override fun onResult(resultList: List<WeChatQRCodeDetector.DecodeResult>) {
+    override fun onResult(resultList: List<DecodeResult>) {
         Log.i(TAG, "onResult, result size: ${resultList.size}")
         scanCallback?.onScanResult(resultList)
     }
@@ -78,9 +77,12 @@ open class ScanQRCodeView @JvmOverloads constructor(context: Context, attrs: Att
         }
     }
 
-    override fun onNextImage() {
-        Log.i(TAG, "onNextImage")
-        cameraController?.takePicture()
+    override fun onCloseImage(image: Image) {
+        Log.i(TAG, "onCloseImage image $image")
+        image.close()
+        if (image == nextImage) {
+            nextImage = null
+        }
     }
 
     override fun onAttachedToWindow() {

@@ -28,7 +28,7 @@ extern "C" {
         if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
             return JNI_ERR;
         }
-        result_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/ocean/star/wechatscan/WeChatQRCodeDetector$DecodeResult")));
+        result_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("com/ocean/star/wechatscan/WeChatQRCodeDetector$Result")));
         rect_class = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("android/graphics/Rect")));
         result_method = env->GetMethodID(result_class, "<init>","(Ljava/lang/String;Landroid/graphics/Rect;)V");
         rect_method = env->GetMethodID(rect_class, "<init>", "(IIII)V");

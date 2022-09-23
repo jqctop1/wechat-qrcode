@@ -10,10 +10,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.net.toFile
 import com.ocean.star.wechatqrcode.databinding.MainActivityBinding
+import com.ocean.star.wechatscan.DecodeResult
 import com.ocean.star.wechatscan.FileDecodeQueue
-import com.ocean.star.wechatscan.WeChatQRCodeDetector
 
 class MainActivity : AppCompatActivity(), FileDecodeQueue.DecodeCallback {
 
@@ -88,7 +87,7 @@ class MainActivity : AppCompatActivity(), FileDecodeQueue.DecodeCallback {
         }
     }
 
-    override fun onResult(resultList: List<WeChatQRCodeDetector.DecodeResult>) {
+    override fun onResult(resultList: List<DecodeResult>) {
         Log.i(TAG, "decode file result ${resultList.first().text}")
         runOnUiThread {
             Toast.makeText(this, resultList.first().text, Toast.LENGTH_SHORT).show()

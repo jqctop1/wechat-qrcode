@@ -33,15 +33,20 @@ class CameraController(private val context: Context, private val lifecycleOwner:
     private var currentCameraInfo: CameraCharacteristics? = null
     private var currentCamera: CameraDevice? = null
     private var captureSession: CameraCaptureSession? = null
-    var imageReader : ImageReader? = null
-        private set
-    var pictureSize: Point ?= null
-        private set
-    var pictureFormat : Int = ImageFormat.JPEG
-    var pictureMaxCount: Int = 2
-    var useFrontCamera: Boolean = false
+
+    var previewImageReader: ImageReader? = null
         private set
     var previewSize: Point ?= null
+    var previewFormat: Int = ImageFormat.YUV_420_888
+
+    var pictureImageReader: ImageReader? = null
+        private set
+    var pictureSize: Point ?= null
+    var pictureFormat: Int = ImageFormat.JPEG
+
+    var useFrontCamera: Boolean = false
+        private set
+    var preferFocusMode: Int = -1
     private var openFlash: Boolean = false
     private var autoFocus: Boolean = false
     private val cameraStateCallback: CameraDevice.StateCallback
@@ -267,9 +272,9 @@ class CameraController(private val context: Context, private val lifecycleOwner:
             }
             return
         }
-        if (currentCamera != null && previewSurface != null && imageReader != null) {
+        if (currentCamera != null && previewSurface != null && previewImageReader != null && pictureImageReader != null) {
             try {
-                currentCamera!!.createCaptureSession(listOf(previewSurface, imageReader!!.surface), object : CameraCaptureSession.StateCallback() {
+                currentCamera!!.createCaptureSession(listOf(previewSurface, previewImageReader!!.surface, pictureImageReader!!.surface), object : CameraCaptureSession.StateCallback() {
                     override fun onConfigured(session: CameraCaptureSession) {
                         Log.i(TAG, "onConfigured session")
                         captureSession = session
@@ -299,19 +304,20 @@ class CameraController(private val context: Context, private val lifecycleOwner:
         var focusMode = CameraCharacteristics.CONTROL_AF_MODE_AUTO
         currentCameraInfo?.let { it ->
             val supportModes = it.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES)
-            Log.i(TAG, "support focus mode size ${supportModes?.size}")
             supportModes?.let { modes ->
-                modes.forEach { mode ->
-                    Log.i(TAG, "support focus mode $mode")
-                }
-                focusMode = if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_VIDEO)) {
-                    CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_VIDEO
-                } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
-                    CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_PICTURE
-                } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_AUTO)) {
-                    CameraCharacteristics.CONTROL_AF_MODE_AUTO
+                Log.i(TAG, "support focus mode ${modes.toList()}, prefer mode $preferFocusMode")
+                focusMode = if (modes.contains(preferFocusMode)) {
+                    preferFocusMode
                 } else {
-                    modes.first()
+                    if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_VIDEO)) {
+                        CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_VIDEO
+                    } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
+                        CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                    } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_AUTO)) {
+                        CameraCharacteristics.CONTROL_AF_MODE_AUTO
+                    } else {
+                        modes.first()
+                    }
                 }
             }
         }
@@ -446,6 +452,9 @@ class CameraController(private val context: Context, private val lifecycleOwner:
                     Log.i(TAG, "previewSurface ${it.isValid}")
                     val requestBuilder = currentCamera?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
                     requestBuilder?.addTarget(it)
+                    previewImageReader?.let {
+                        requestBuilder?.addTarget(it.surface)
+                    }
                     requestBuilder?.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
                     requestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, getAutoFocusMode())
                     requestBuilder?.set(CaptureRequest.CONTROL_AE_MODE, CameraCharacteristics.CONTROL_AE_MODE_ON)
@@ -500,7 +509,7 @@ class CameraController(private val context: Context, private val lifecycleOwner:
     fun takePicture() {
         try {
             captureSession?.let {
-                imageReader?.let {
+                pictureImageReader?.let {
                     Log.i(TAG, "take picture")
                     val requestBuilder = currentCamera?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
                     requestBuilder?.addTarget(it.surface)
@@ -536,8 +545,10 @@ class CameraController(private val context: Context, private val lifecycleOwner:
             stopPreview()
             Log.i(TAG, "close camera")
             previewSurface?.release()
-            imageReader?.close()
-            imageReader = null
+            previewImageReader?.close()
+            previewImageReader = null
+            pictureImageReader?.close()
+            pictureImageReader = null
             currentCamera?.close()
             currentCamera = null
             currentCameraInfo = null
@@ -568,22 +579,20 @@ class CameraController(private val context: Context, private val lifecycleOwner:
         return false
     }
 
-    fun createImageReader(pictureSize: Point, format: Int, pictureMaxCount: Int = 2) {
-        this.pictureSize = pictureSize
-        this.pictureFormat = format
-        this.pictureMaxCount = pictureMaxCount
-        imageReader?.close()
-        imageReader = ImageReader.newInstance(pictureSize.x, pictureSize.y, format, this.pictureMaxCount)
-    }
-
     fun onSurfaceCreated(surface: Surface, size: Point) {
         Log.i(TAG, "onSurfaceCreated")
         stopPreview()
         previewSurface?.release()
         previewSurface = surface
         previewSize = size
-        if (imageReader == null) {
-            createImageReader(size, pictureFormat, pictureMaxCount)
+        if (pictureSize == null) {
+            pictureSize = size
+        }
+        if (previewImageReader == null) {
+            previewImageReader = ImageReader.newInstance(previewSize!!.x, previewSize!!.y, previewFormat, 1)
+        }
+        if (pictureImageReader == null) {
+            pictureImageReader = ImageReader.newInstance(pictureSize!!.x, pictureSize!!.y, pictureFormat, 1)
         }
         if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.RESUMED) {
             startPreview()
