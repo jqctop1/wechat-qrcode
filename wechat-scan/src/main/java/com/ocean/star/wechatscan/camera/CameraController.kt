@@ -614,7 +614,7 @@ class CameraController(private val context: Context, private val lifecycleOwner:
         currentCameraInfo?.let {
             val previewMap = it.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
             val rotation = it.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
-            Log.i(TAG, "rotation $rotation, landscape $landscape")
+            Log.i(TAG, "rotation $rotation, landscape $landscape, surface $surfaceSize")
             val needRotate = !landscape && (rotation % 180 != 0)
             val surfaceRatio = if (needRotate) {
                 surfaceSize.y.toFloat() / surfaceSize.x
@@ -627,7 +627,8 @@ class CameraController(private val context: Context, private val lifecycleOwner:
             }
             previewSizeList?.filter { size ->
                 val screenSize = getScreenRealSize(context)
-                (size.width * size.height <= screenSize.x * screenSize.y)
+                (size.width * size.height <= screenSize.x * screenSize.y
+                        && size.height >= kotlin.math.min(surfaceSize.x, surfaceSize.y))
             }?.forEach { size ->
                 val previewRatio = 1.0f * size.width / size.height
                 Log.d(TAG, "preview size: ${size.width}, ${size.height}, preview ratio: ${previewRatio}, surface ratio: $surfaceRatio")
