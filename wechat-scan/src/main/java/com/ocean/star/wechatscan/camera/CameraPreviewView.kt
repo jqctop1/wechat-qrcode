@@ -64,7 +64,7 @@ open class CameraPreviewView @JvmOverloads constructor(context: Context, attrs: 
             cameraController = CameraController(context, it)
         }
         gestureDetector = GestureDetector(context, object: GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(e: MotionEvent?): Boolean {
+            override fun onDown(e: MotionEvent): Boolean {
                 return true
             }
 

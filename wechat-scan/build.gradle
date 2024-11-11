@@ -4,10 +4,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 34
+    ndkVersion = "26.1.10909125"
 
     defaultConfig {
+        namespace = "com.ocean.star.wechatscan"
         minSdkVersion 21
         targetSdkVersion 28
         externalNativeBuild {
@@ -16,7 +17,6 @@ android {
                 arguments   "-DANDROID_CPP_FEATURES=rtti exceptions",
                             "-DANDROID_STL=c++_shared"
                             "-DANDROID_TOOLCHAIN=clang"
-                            "-DANDROID_TOOLCHAIN_FILE=~/Library/Android/sdk/ndk/19.2.5345600/build/cmake/android.toolchain.cmake"
             }
         }
     }
@@ -27,16 +27,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
+    implementation 'androidx.camera:camera-core:1.4.0'
 
 }

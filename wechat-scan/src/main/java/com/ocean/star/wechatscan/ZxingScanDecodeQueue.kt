@@ -10,7 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.zxingcpp.BarcodeReader
+import zxingcpp.BarcodeReader
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.FutureTask
@@ -31,11 +31,10 @@ class ZxingScanDecodeQueue(private val lifecycleOwner: LifecycleOwner) : Lifecyc
 
     private var decodingTask: FutureTask<List<DecodeResult>>? = null
     private var decodeExecutor = Executors.newSingleThreadExecutor()
-    private val qrCodeReader = BarcodeReader()
-    private val options = BarcodeReader.Options(
+    private val qrCodeReader = BarcodeReader(options = BarcodeReader.Options(
         formats = setOf(BarcodeReader.Format.QR_CODE),
         tryRotate = true,
-        tryDownscale = true)
+        tryDownscale = true))
     var decodeCallback: DecodeCallback? = null
 
     fun decode(image: Image) {
@@ -74,25 +73,16 @@ class ZxingScanDecodeQueue(private val lifecycleOwner: LifecycleOwner) : Lifecyc
                 val start = System.currentTimeMillis()
                 val width = image.width
                 val height = image.height
-                val rowStride = image.planes[0].rowStride
-                val y = image.planes[0].buffer
-                val yBuffer = ByteArray(y.limit())
-                y.position(y.limit()).flip()
-                y.get(yBuffer)
                 Log.i(TAG, "width, height: $width, $height")
                 callbackHandler.sendMessage(Message.obtain(callbackHandler, Msg.onCloseImage.ordinal, image))
                 val decodeStart = System.currentTimeMillis()
-                qrCodeReader.read(yBuffer, rowStride, width, height, options)?.let {
+                qrCodeReader.read(image).forEach {
                     if (!it.text.isNullOrEmpty()) {
-                        if (it.position != null) {
-                            val left = it.position.topLeft.x.coerceAtMost(it.position.bottomLeft.x)
-                            val top = it.position.topLeft.y.coerceAtMost(it.position.topRight.y)
-                            val right = it.position.topRight.x.coerceAtLeast(it.position.bottomRight.x)
-                            val bottom = it.position.bottomLeft.y.coerceAtLeast(it.position.bottomRight.y)
-                            resultList.add(DecodeResult(it.text, Rect(left, top, right, bottom)))
-                        } else {
-                            resultList.add(DecodeResult(it.text, Rect()))
-                        }
+                        val left = it.position.topLeft.x.coerceAtMost(it.position.bottomLeft.x)
+                        val top = it.position.topLeft.y.coerceAtMost(it.position.topRight.y)
+                        val right = it.position.topRight.x.coerceAtLeast(it.position.bottomRight.x)
+                        val bottom = it.position.bottomLeft.y.coerceAtLeast(it.position.bottomRight.y)
+                        resultList.add(DecodeResult(it.text, Rect(left, top, right, bottom)))
                     }
                 }
                 val decodeCost = System.currentTimeMillis() - decodeStart
